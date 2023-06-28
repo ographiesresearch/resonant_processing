@@ -122,6 +122,12 @@ class FFEUnemp(County, Meta):
     # fossil fuel employment (FFE) & unemployment requirements
     # https://edx.netl.doe.gov/dataset/dbed5af6-7cf5-4a1f-89bc-a4c17e46256a/resource/b736a14f-12a7-4b9f-8f6d-236aa3a84867
     # =====================================
+    msa = models.BooleanField(
+        help_text = """
+            Whether county is MSA or non-MSA.
+            """
+        )
+    
     ffe = models.BooleanField(
         help_text = """
             >= 0.17pct direct emp | >= 25pct local tax revs 
