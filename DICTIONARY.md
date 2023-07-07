@@ -3,7 +3,7 @@
 + Geography: Census tract.
 + Data Source: ACS 2016-2020 Estimates.
 
-Calculate low-income communities on the basis of ACS estimates."Low-income" is defined by ["New Markets Tax Credits," Section 45D(e)(1) of IRC](https://www.federalregister.gov/d/01-31391/p-16) as...
+"Low-income communities" are defined by ["New Markets Tax Credits," Section 45D(e)(1) of IRC](https://www.federalregister.gov/d/01-31391/p-16) as...
 
 > any population census tract if (A) the poverty rate for such tract is at least 20 percent, or (B)(i) in the case of a tract not located within a Metropolitan Area (as hereinafter defined), the median family income for such tract does not exceed 80 percent of statewide median family income, or (ii) in the case of a tract located within a Metropolitan Area, the median family income for such tract does not exceed 80 percent of the greater of statewide median family income or the Metropolitan Area median family income.
 
