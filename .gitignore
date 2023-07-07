@@ -233,3 +233,9 @@ Temporary Items
 
 # End of https://www.toptal.com/developers/gitignore/api/django,linux,macos
 .Rproj.user
+
+renv/*
+
+data/*.csv
+data/*.kmz
+data/*.gpkg
