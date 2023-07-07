@@ -1,5 +1,6 @@
 import requests
 import os
+import sys
 
 DATA_DIR = 'data'
 
@@ -15,19 +16,31 @@ FILE_LOCATIONS = {
    "brownfields": {
        "longname": "Brownfields",
        "url": "https://ordsext.epa.gov/FLA/www3/acres_frs.kmz"
+   },
+   "coal_tracts": {
+       "longname": "Census Tracts Affected by Coal Closures",
+       "url": "https://edx.netl.doe.gov/resource/28a8eb09-619e-49e5-8ae3-6ddd3969e845/download?authorized=True",
+       "ext": "csv"
+   },
+   "employment_msas": {
+       "longname": "Areas with energy economies or high unemployment.",
+       "url": "https://edx.netl.doe.gov/resource/b736a14f-12a7-4b9f-8f6d-236aa3a84867/download?authorized=True",
+       "ext": "csv"
    }
-   # THESE ARE BASED ON 2020 GEOGRAPHIES
-   # Census Tracts (2020): https://edx.netl.doe.gov/resource/28a8eb09-619e-49e5-8ae3-6ddd3969e845/download?authorized=True
-   # MSA/NMSA (but by 2020 Counties): https://edx.netl.doe.gov/resource/b736a14f-12a7-4b9f-8f6d-236aa3a84867/download?authorized=True
-   # Brownfield KMZ: https://ordsext.epa.gov/FLA/www3/acres_frs.kmz
 }
 
 def download_files(files = FILE_LOCATIONS, path = DATA_DIR):
     for source, props in files.items():
-        ext = os.path.splitext(props['url'])
-        print(f"Downloading {props['longname']} as {source}{ext[1]}. 🚀")
+        ext = os.path.splitext(props['url'])[1]
+        if (len(ext) == 0):
+            try:
+                ext = '.' + props['ext']
+            except:
+                print("Could not obtain file extension.")
+                sys.exit()
+        print(f"Downloading {props['longname']} as {source}{ext}. 🚀")
         r = requests.get(props['url'], stream=True)
-        with open(os.path.join(path, f'{source}{ext[1]}'), 'wb') as f:
+        with open(os.path.join(path, f'{source}{ext}'), 'wb') as f:
             f.write(r.content)
         print(f"Done. ✔️")
 
