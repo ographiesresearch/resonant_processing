@@ -10,9 +10,9 @@ Calculate low-income communities on the basis of ACS estimates."Low-income" is d
 In other words, whether a tract is a low-income community is given by...
 
 $$
-low\\_inc = 
+low\\_inc_t = 
 \begin{cases}
-    1,& \text{if } (pov\\_rate >= 0.2)\text{ or }(inc\\_ratio <= 0.8) \\
+    1,& \text{if } (pov\\_rate_t >= 0.2)\text{ or }(inc\\_ratio_t <= 0.8) \\
     0,              & \text{otherwise}
 \end{cases}
 $$
@@ -24,7 +24,7 @@ As such, we need to calculate both the poverty rate (`pov_rate`) and the ratio o
 The poverty rate is defined as....
 
 $$
-pov\\_rate = \frac{I_t}{P_t}
+pov\\_rate_t = \frac{I_t}{P_t}
 $$
 
 ...where $I_t$ is [Income in the past 12 months below poverty level (`B17001_002`)](https://www.socialexplorer.com/data/ACS2020_5yr/metadata/?ds=ACS20_5yr&var=B17001002), and $P_t$ [is Population for whom poverty status is determined (`B17001_001`)](https://www.socialexplorer.com/data/ACS2020_5yr/metadata/?ds=ACS20_5yr&var=B17001001).
@@ -34,7 +34,7 @@ $$
 The income ratio is defined as...
 
 $$
-inc\\_ratio = 
+inc\\_ratio_t = 
 \begin{cases}
   \dfrac{MFI_t}{\max(MFI_s, MFI_m)} & \text{if }\exists MFI_m,\\
   \dfrac{MFI_t}{MFI_s} & \text{otherwise}
