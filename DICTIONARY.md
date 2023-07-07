@@ -42,3 +42,19 @@ inc\\_ratio_t =
 $$
 
 ...where $MFI_t$ is a given tract's Median Family Income In The Past 12 Months (MFI, In 2020 Inflation-Adjusted Dollars), $MFI_s$ is the statewide MFI, and $MFI_m$ is the metropolitan statistical area-wide MFI for tracts that lie within MSAs. All are identified by the ACS variable [`B19113_001`](https://www.socialexplorer.com/data/ACS2020_5yr/metadata/?ds=ACS20_5yr&var=B19113001).
+
+# Energy Communities
+
+[TODO](https://github.com/ericrobskyhuntley/resonant_map/issues/6)
+
+# CEJST-Designated Disadvantage
+
+[TODO](https://github.com/ericrobskyhuntley/resonant_map/issues/5)
+
+# Persistent Poverty County
+
+[TODO](https://github.com/ericrobskyhuntley/resonant_map/issues/4)
+
+# Indian Land
+
+[TODO](https://github.com/ericrobskyhuntley/resonant_map/issues/3)
