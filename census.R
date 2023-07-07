@@ -24,7 +24,7 @@ tracts_data <- purrr::map(states, function(state) {
   dplyr::rename(
     mfi = B19113_001
   ) |>
-  dplyr::select(-c(B17001_002, B17001_001, B02001_001, B02001_004))
+  dplyr::select(-c(B17001_002, B17001_001))
 
 states_data <- tidycensus::get_acs(
     geography = "state",
