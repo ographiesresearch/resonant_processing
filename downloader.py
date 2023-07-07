@@ -7,6 +7,10 @@ FILES = {
    "cejst": {
        "longname": "Climate and Economic Justice Screening Tool Data",
        "url": "https://static-data-screeningtool.geoplatform.gov/data-versions/1.0/data/score/downloadable/1.0-communities.csv"
+   },
+   "ppc": {
+       "longname": "Persistent Poverty Counties",
+       "url": "https://www.ers.usda.gov/webdocs/DataFiles/48652/2015CountyTypologyCodes.csv"
    }
 }
 
