@@ -1,10 +1,13 @@
+YEAR <- 2020
+DATA_PATH <- 'data'
+
 states <- base::unique(tidycensus::fips_codes$state)[1:51]
 
 tracts_data <- purrr::map(states, function(state) {
       tidycensus::get_acs(
       geography = "tract",
       state = state,
-      year = 2020,
+      year = YEAR,
       variables = c("B17001_001", "B17001_002", "B19113_001"),
       geometry = FALSE
     )
@@ -28,7 +31,7 @@ tracts_data <- purrr::map(states, function(state) {
 
 states_data <- tidycensus::get_acs(
     geography = "state",
-    year = 2020,
+    year = YEAR,
     variables = "B19113_001",
     geometry = FALSE
   )|>
@@ -40,7 +43,7 @@ states_data <- tidycensus::get_acs(
 
 metros_data <- tidycensus::get_acs(
     geography = "cbsa",
-    year = 2020,
+    year = YEAR,
     variables = "B19113_001",
     geometry = TRUE
   ) |>
@@ -54,11 +57,22 @@ metros_data <- tidycensus::get_acs(
   )
 
 tracts_geom <- purrr::map(states, function(s) {
-    tigris::tracts(year = 2020, state = s)
+    tigris::tracts(year = YEAR, state = s)
   }) |>
   purrr::list_rbind() |>
   sf::st_as_sf() |>
   dplyr::select(c(GEOID)) |>
+  dplyr::rename_with(tolower)
+
+tracts_geom_2010 <- purrr::map(states, function(s) {
+  tigris::tracts(year = 2010, state = s)
+}) |>
+  purrr::list_rbind() |>
+  sf::st_as_sf() |>
+  dplyr::select(c(GEOID10)) |>
+  dplyr::rename(
+    geoid = GEOID10
+  )
   dplyr::rename_with(tolower)
 
 metro_tracts <- tracts_geom |>
@@ -81,11 +95,16 @@ results <- tracts_data |>
     inc_low = inc_pct <= 0.8
   )
 
+tigris::counties(year = YEAR) |>
+  sf::st_write(base::file.path(DATA_PATH, "counties.shp"), delete_dsn = TRUE)
+
 tracts_geom |>
-  dplyr::left_join(results, by = c("geoid" = "geoid")) |>
-  sf::st_write("tracts.shp", delete_dsn = TRUE)
+  # dplyr::left_join(results, by = c("geoid" = "geoid")) |>
+  sf::st_write(base::file.path(DATA_PATH, "tracts.shp"), delete_dsn = TRUE)
 
+tracts_geom_2010 |>
+  # dplyr::left_join(results, by = c("geoid" = "geoid")) |>
+  sf::st_write(base::file.path(DATA_PATH, "tracts_2010.shp"), delete_dsn = TRUE)
 
-
-
-
+tigris::native_areas(year = YEAR) |>
+  sf::st_write(base::file.path(DATA_PATH, "native_lands.shp"), delete_dsn = TRUE)
