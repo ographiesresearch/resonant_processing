@@ -20,12 +20,12 @@ FILE_LOCATIONS = {
    "coal_tracts": {
        "longname": "Census Tracts Affected by Coal Closures",
        "url": "https://edx.netl.doe.gov/resource/28a8eb09-619e-49e5-8ae3-6ddd3969e845/download?authorized=True",
-       "ext": "csv"
+       "ext": "zip"
    },
    "employment_msas": {
        "longname": "Areas with energy economies or high unemployment.",
        "url": "https://edx.netl.doe.gov/resource/b736a14f-12a7-4b9f-8f6d-236aa3a84867/download?authorized=True",
-       "ext": "csv"
+       "ext": "zip"
    }
 }
 
