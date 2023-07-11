@@ -20,8 +20,6 @@ class State(models.Model):
         help_text = "Longhand state name.",
         blank = True
         )
-
-    geometry = models.MultiPolygonField()
     
     def geoid(self):
         "Returns GEOID."
@@ -65,7 +63,7 @@ class Tract(County):
         abstract = True
     
 class Meta(models.Model):
-    date_last = models.DateField(
+    last_update = models.DateField(
         help_text = """
             Date last updated (n.b., reflects data as acquired,
             not this database instance).
@@ -103,7 +101,7 @@ class CoalClosures(Tract, Meta):
             has been retired after 2009.
             """
         )
-    neighbor = models.BooleanField(
+    adjacent = models.BooleanField(
         help_text = """
             Whether tract adjoins coal closure tract.
             """
@@ -117,7 +115,7 @@ class CoalClosures(Tract, Meta):
     def __str__(self):
         return self.geoid()
 
-class FFEUnemp(County, Meta):
+class FFE(County, Meta):
     # MSA/Non-MSA layer
     # fossil fuel employment (FFE) & unemployment requirements
     # https://edx.netl.doe.gov/dataset/dbed5af6-7cf5-4a1f-89bc-a4c17e46256a/resource/b736a14f-12a7-4b9f-8f6d-236aa3a84867
@@ -127,20 +125,17 @@ class FFEUnemp(County, Meta):
             Whether county is MSA or non-MSA.
             """
         )
-    
     ffe = models.BooleanField(
         help_text = """
             >= 0.17pct direct emp | >= 25pct local tax revs 
             related to coal, oil, or natural gas;
             """
         )
-        
     unemp = models.BooleanField(
         help_text = """
             County unemployment rate >= nat'l avg?
             """
         )
-    
     def energy_community(self):
         "Returns whether county is energy community."
         if self.ffe and self.unemp:
@@ -149,3 +144,27 @@ class FFEUnemp(County, Meta):
     # Represents county as geoid string.
     def __str__(self):
         return self.geoid()
+    
+class PPC(County, Meta):
+    # Persistent poverty County
+    msa = models.BooleanField(
+        help_text = """
+            Whether county is MSA or non-MSA.
+            """
+        )
+    pp = models.BooleanField(
+        help_text = """
+            Whether county is persistent poverty county 
+            """
+        )
+    
+    # Represents county as geoid string.
+    def __str__(self):
+        return self.geoid()
+    
+# A facility owner will meet the geographic criterion 
+# if it is located in a Persistent Poverty County
+# or in a census tract that is designated in the 
+# Climate and Economic Justice Screening Tool (CEJST)
+# as disadvantaged based on energy burden and particulate
+# matter (PM) 2.5 indicators. 
