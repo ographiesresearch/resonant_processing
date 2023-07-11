@@ -62,7 +62,7 @@ A “brownfield site” (as defined in certain subparagraphs of the Comprehensiv
 
 | Geography  | Date | Source |
 | ---------- | ---- | ----------- |
-| Counties (2020)  | 2022 | [NETL](https://edx.netl.doe.gov/dataset/ira-energy-community-data-layers) |
+| Counties  | 2022 | [NETL](https://edx.netl.doe.gov/dataset/ira-energy-community-data-layers) |
 
 A “metropolitan statistical area” or “non-metropolitan statistical area” that has (or had at any time after 2009)... 
 
@@ -107,7 +107,11 @@ $$
 
 ## Persistent Poverty County
 
-[TODO](https://github.com/ericrobskyhuntley/resonant_map/issues/4)
+| Geography  | Date | Source |
+| ---------- | ---- | ----------- |
+| Counties  | 2015 | [USDA](https://www.ers.usda.gov/topics/rural-economy-population/rural-poverty-well-being/#geography) |
+
+Persistent Poverty Counties, or PPCs, are one of the [county typologies](https://www.ers.usda.gov/data-products/county-typology-codes/) developed by the Economic Research Service of the USDA. These are defined as counties in which "20 percent or more of their populations were living in poverty based on the 1980, 1990, and 2000 decennial censuses and 2007-11 ACS 5-year estimates."
 
 ## Indian Land
 
