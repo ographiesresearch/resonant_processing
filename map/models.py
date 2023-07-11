@@ -1,18 +1,11 @@
 from django.db import models
 from django.contrib.gis.db import models
 
-# U.S. Department of Energy (DOE), National Energy Technology 
-# Laboratory (NETL), Interagency Working Group on Coal & Power 
-# Plant Communities & Economic Revitalization (IWG), U.S. 
-# Department of the Treasury, IRA Energy Community Data Layers, 
-# 4/3/2023, 
-# https://edx.netl.doe.gov/dataset/ira-energy-community-data-layers
-
-class State(models.Model):
-    state = models.CharField(
+class States(models.Model):
+    geoid = models.CharField(
         max_length = 2,
         help_text = "Two-digit state FIPS.",
-        blank = False
+        primary_key = True
         )
     # Longest state name is "Massachusetts," at 14.
     state_name = models.CharField(
@@ -21,18 +14,20 @@ class State(models.Model):
         blank = True
         )
     
+    geometry = models.MultiPolygonField()
     def geoid(self):
         "Returns GEOID."
         return self.state
-
-    class Meta:
-        abstract = True
     
-class County(State):
-    county = models.CharField(
-        max_length = 3,
-        help_text = "Three-digit county FIPS.",
-        blank = False
+class Counties(models.Model):
+    state_geoid = models.ForeignKey(
+        States,
+        on_delete = models.CASCADE
+        )
+    geoid = models.CharField(
+        max_length = 5,
+        help_text = "Five-digit county FIPS.",
+        primary_key = True
         )
     # Longest county names are 14 characters + 7 for ' County'
     county_name = models.CharField(
@@ -40,27 +35,23 @@ class County(State):
         help_text = "Longhand county name.",
         blank = True
         )
+    geometry = models.MultiPolygonField()
     
-    def geoid(self):
-        "Returns GEOID."
-        return "".join([self.state, self.county])
-
-    class Meta:
-        abstract = True
-    
-class Tract(County):
-    tract = models.CharField(
+class Tracts(models.Model):
+    state_geoid = models.ForeignKey(
+        States,
+        on_delete = models.CASCADE
+        )
+    county_geoid = models.ForeignKey(
+        Counties,
+        on_delete = models.CASCADE
+        )
+    geoid = models.CharField(
         max_length = 6,
         help_text = "Six-digit tract FIPS.",
-        blank = False
+        primary_key = True
         )
-    
-    def geoid(self):
-        "Returns GEOID."
-        return "".join([self.state, self.county, self.tract])
-
-    class Meta:
-        abstract = True
+    geometry = models.MultiPolygonField()
     
 class Meta(models.Model):
     last_update = models.DateField(
@@ -87,9 +78,12 @@ class Meta(models.Model):
     class Meta:
         abstract = True
 
-class CoalClosures(Tract, Meta):
+class CoalClosures(Meta):
     # Coal closure energy communities' layer 
-    # https://edx.netl.doe.gov/dataset/dbed5af6-7cf5-4a1f-89bc-a4c17e46256a/resource/28a8eb09-619e-49e5-8ae3-6ddd3969e845
+    tract_geoid = models.ForeignKey(
+        Tracts,
+        on_delete = models.CASCADE
+        )
     mine = models.BooleanField(
         help_text = """
             Whether a coal mine has closed after 1999.
@@ -113,13 +107,14 @@ class CoalClosures(Tract, Meta):
 
     # Represents tract as geoid string.
     def __str__(self):
-        return self.geoid()
+        return self.tract_geoid()
 
-class FFE(County, Meta):
-    # MSA/Non-MSA layer
+class FFE(Meta):
     # fossil fuel employment (FFE) & unemployment requirements
-    # https://edx.netl.doe.gov/dataset/dbed5af6-7cf5-4a1f-89bc-a4c17e46256a/resource/b736a14f-12a7-4b9f-8f6d-236aa3a84867
-    # =====================================
+    county_geoid = models.ForeignKey(
+        Counties,
+        on_delete = models.CASCADE
+    )
     msa = models.BooleanField(
         help_text = """
             Whether county is MSA or non-MSA.
@@ -143,10 +138,14 @@ class FFE(County, Meta):
 
     # Represents county as geoid string.
     def __str__(self):
-        return self.geoid()
+        return self.county_geoid()
     
-class PPC(County, Meta):
+class PPC(Meta):
     # Persistent poverty County
+    county_geoid = models.ForeignKey(
+        Counties,
+        on_delete = models.CASCADE
+    )
     msa = models.BooleanField(
         help_text = """
             Whether county is MSA or non-MSA.
@@ -160,11 +159,4 @@ class PPC(County, Meta):
     
     # Represents county as geoid string.
     def __str__(self):
-        return self.geoid()
-    
-# A facility owner will meet the geographic criterion 
-# if it is located in a Persistent Poverty County
-# or in a census tract that is designated in the 
-# Climate and Economic Justice Screening Tool (CEJST)
-# as disadvantaged based on energy burden and particulate
-# matter (PM) 2.5 indicators. 
+        return self.county_geoid()
