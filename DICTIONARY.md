@@ -64,7 +64,10 @@ A “brownfield site” (as defined in certain subparagraphs of the Comprehensiv
 | ---------- | ---- | ----------- |
 | Counties (2020)  | 2022 | [NETL](https://edx.netl.doe.gov/dataset/ira-energy-community-data-layers) |
 
-A “metropolitan statistical area” or “non-metropolitan statistical area” that has (or had at any time after 2009) 0.17% or greater direct employment or 25% or greater local tax revenues related to the extraction, processing, transport, or storage of coal, oil, or natural gas; and has an unemployment rate at or above the national average unemployment rate for the previous year
+A “metropolitan statistical area” or “non-metropolitan statistical area” that has (or had at any time after 2009)... 
+
++ 0.17% or greater direct employment or 25% or greater local tax revenues related to the extraction, processing, transport, or storage of coal, oil, or natural gas; and
++ has an unemployment rate at or above the national average unemployment rate for the previous year
 
 ### Coal Closure Communities
 
