@@ -48,7 +48,7 @@ $$
 
 ## Energy Communities
 
-"Energy Communities" are defined for the IRA's Energy Community Tax Credit Bonus. With the exception of brownfields, these are calculated by the DoE; they are defined on the three following geographies.
+"Energy Communities" are defined for the IRA's [Energy Community Tax Credit Bonus](https://energycommunities.gov/energy-community-tax-credit-bonus/). With the exception of brownfields, these are calculated by the DoE; they are defined on the three following geographies.
 
 ### Brownfield Sites
 
