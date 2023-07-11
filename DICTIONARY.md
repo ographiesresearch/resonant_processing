@@ -1,7 +1,10 @@
-# Low-Income Communities (`low_inc`)
+# Data Dictionary
 
-+ Geography: Census tract.
-+ Data Source: ACS 2016-2020 Estimates.
+## Low-Income Communities (`low_inc`)
+
+| Geography  | Date |
+| ---------- | ---- |
+| Census Tracts (2020)  | 2016-2020 |
 
 "Low-income communities" are defined by ["New Markets Tax Credits," Section 45D(e)(1) of IRC](https://www.federalregister.gov/d/01-31391/p-16) as...
 
@@ -19,7 +22,7 @@ $$
 
 As such, we need to calculate both the poverty rate (`pov_rate`) and the ratio of tract income to regional income (`inc_ratio`). These are defined below.
 
-## Poverty Rate
+### Poverty Rate
 
 The poverty rate is defined as....
 
@@ -29,7 +32,7 @@ $$
 
 ...where $I_t$ is [Income in the past 12 months below poverty level (`B17001_002`)](https://www.socialexplorer.com/data/ACS2020_5yr/metadata/?ds=ACS20_5yr&var=B17001002), and $P_t$ [is Population for whom poverty status is determined (`B17001_001`)](https://www.socialexplorer.com/data/ACS2020_5yr/metadata/?ds=ACS20_5yr&var=B17001001).
 
-## Income Ratio
+### Income Ratio
 
 The income ratio is defined as...
 
@@ -43,18 +46,73 @@ $$
 
 ...where $MFI_t$ is a given tract's Median Family Income In The Past 12 Months (MFI, In 2020 Inflation-Adjusted Dollars), $MFI_s$ is the statewide MFI, and $MFI_m$ is the metropolitan statistical area-wide MFI for tracts that lie within MSAs. All are identified by the ACS variable [`B19113_001`](https://www.socialexplorer.com/data/ACS2020_5yr/metadata/?ds=ACS20_5yr&var=B19113001).
 
-# Energy Communities
+## Energy Communities
 
-[TODO](https://github.com/ericrobskyhuntley/resonant_map/issues/6)
+"Energy Communities" are defined for the IRA's [Energy Community Tax Credit Bonus](https://energycommunities.gov/energy-community-tax-credit-bonus/). With the exception of brownfields, these are calculated by the DoE; they are defined on the three following geographies.
 
-# CEJST-Designated Disadvantage
+### Brownfield Sites
 
-[TODO](https://github.com/ericrobskyhuntley/resonant_map/issues/5)
+| Geography  | Date | Source |
+| ---------- | ---- | ----------- |
+| Point Locations  | 2023 | [EPA](https://www.epa.gov/frs/geospatial-data-download-service) |
 
-# Persistent Poverty County
+A “brownfield site” (as defined in certain subparagraphs of the Comprehensive Environmental Response, Compensation, and Liability Act of 1980 (CERCLA))
 
-[TODO](https://github.com/ericrobskyhuntley/resonant_map/issues/4)
+### Fossil Fuel Employment Communities
 
-# Indian Land
+| Geography  | Date | Source |
+| ---------- | ---- | ----------- |
+| Counties  | 2022 | [NETL](https://edx.netl.doe.gov/dataset/ira-energy-community-data-layers) |
+
+A “metropolitan statistical area” or “non-metropolitan statistical area” that has (or had at any time after 2009)... 
+
++ 0.17% or greater direct employment or 25% or greater local tax revenues related to the extraction, processing, transport, or storage of coal, oil, or natural gas; and
++ has an unemployment rate at or above the national average unemployment rate for the previous year
+
+### Coal Closure Communities
+
+| Geography  | Date | Source |
+| ---------- | ---- | ----------- |
+| Census Tracts (2020)  | 2022 | [NETL](https://edx.netl.doe.gov/dataset/ira-energy-community-data-layers) |
+
+A census tract (or directly adjoining census tract) in which
+
++ a coal mine has closed after 1999; or
++ in which a coal-fired electric generating unit has been retired after 2009.
+
+## Energy Disadvantage
+
+| Geography  | Date | Source |
+| ---------- | ---- | ----------- |
+| Census Tract (2010)  | 2015-2019 | CEJST |
+
+The [Climate and Economic Justice Screening Tool](https://screeningtool.geoplatform.gov/en/) identifies communities (i.e., census tracts) as energy disadvantaged if they are either...
+
++ At or above the 90th percentile for energy costs; or
++ At or above the 90th percentile for PM2.5 exposure
+
+...and...
+
++ At or above the 65th percentile for low income.
+
+In other words...
+
+$$
+energy\\_dis = 
+\begin{cases}
+  1 & (energy\\_costs >= 95^{th}\text{ \\%ile}\text{ | }pm25\\_exp >= 95^{th}\text{ \\%ile})\text{ \\& } low\\_income >= 65^{th}\text{ \\%ile}\\
+  0 & \text{otherwise}
+\end{cases}
+$$
+
+## Persistent Poverty County
+
+| Geography  | Date | Source |
+| ---------- | ---- | ----------- |
+| Counties  | 2015 | [USDA](https://www.ers.usda.gov/topics/rural-economy-population/rural-poverty-well-being/#geography) |
+
+Persistent Poverty Counties, or PPCs, are one of the [county typologies](https://www.ers.usda.gov/data-products/county-typology-codes/) developed by the Economic Research Service of the USDA. These are defined as counties in which "20 percent or more of their populations were living in poverty based on the 1980, 1990, and 2000 decennial censuses and 2007-11 ACS 5-year estimates."
+
+## Indian Land
 
 [TODO](https://github.com/ericrobskyhuntley/resonant_map/issues/3)
