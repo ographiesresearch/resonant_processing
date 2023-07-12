@@ -75,20 +75,23 @@ class Meta(models.Model):
             Date last updated (n.b., reflects data as acquired,
             not this database instance).
             """,
-        blank = True
+        blank = True,
+        null = True
         )
     version = models.DecimalField(
         max_digits = 5, 
         decimal_places = 1,
         help_text = "Dataset version.",
-        blank = True
+        blank = True,
+        null = True
         )
     added = models.DateField(
         help_text = """
             Date added (n.b., reflects data as acquired,
             not this database instance).
             """,
-        blank = True
+        blank = True,
+        null = True
         )
 
     class Meta:
@@ -96,7 +99,7 @@ class Meta(models.Model):
 
 class CoalClosures(Meta):
     # Coal closure energy communities' layer 
-    tract_geoid = models.ForeignKey(
+    tract_fips = models.ForeignKey(
         Tract,
         on_delete = models.CASCADE
         )
@@ -123,7 +126,7 @@ class CoalClosures(Meta):
 
     # Represents tract as geoid string.
     def __str__(self):
-        return self.tract_geoid()
+        return self.tract_fips
 
 class FFE(Meta):
     # fossil fuel employment (FFE) & unemployment requirements
