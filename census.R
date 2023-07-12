@@ -1,7 +1,6 @@
 YEAR <- 2020
 DATA_PATH <- 'data'
 STATES <- base::unique(tidycensus::fips_codes$state)[1:51]
-STATES <- c("MA", "CT")
 
 ct_all_states_data <- function(year = YEAR, states = STATES) {
     tidycensus::get_acs(
