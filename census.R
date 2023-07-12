@@ -1,6 +1,7 @@
 YEAR <- 2020
 DATA_PATH <- 'data'
 STATES <- base::unique(tidycensus::fips_codes$state)[1:51]
+STATES <- c("MA", "CT")
 
 ct_all_states_data <- function(year = YEAR, states = STATES) {
     tidycensus::get_acs(
@@ -77,7 +78,12 @@ ct_all_states_geom <- function(year = YEAR, states = STATES) {
       )
   }
   df |> 
-    dplyr::select(c(statefp, countyfp, geoid))
+    dplyr::mutate(
+      countyfp = stringr::str_c(statefp, countyfp)
+    ) |>
+    dplyr::select(c(statefp, countyfp, geoid)) |>
+    sf::st_set_geometry('geometry') |>
+    sf::st_cast('MULTIPOLYGON')
 }
 
 run <- function(year = YEAR, states = STATES, spatial_format = "gpkg") {
@@ -131,6 +137,7 @@ run <- function(year = YEAR, states = STATES, spatial_format = "gpkg") {
       tigris::counties(year = year, state = s)
     }) |>
     purrr::list_rbind() |>
+    dplyr::rename_with(tolower) |>
     sf::st_write(
       base::file.path(
         DATA_PATH, 
@@ -144,8 +151,9 @@ run <- function(year = YEAR, states = STATES, spatial_format = "gpkg") {
       )
   
   message("Downloading and writing states...")
-  tigris::states(year = YEAR) |>
-    dplyr::filter(STUSPS %in% states) |>
+  tigris::states(year = year) |>
+    dplyr::rename_with(tolower) |>
+    dplyr::filter(stusps %in% states) |>
     sf::st_write(
       base::file.path(
         DATA_PATH, 
@@ -173,7 +181,7 @@ run <- function(year = YEAR, states = STATES, spatial_format = "gpkg") {
     ) 
   
   message("Downloading and writing native lands...")
-  tigris::native_areas(year = YEAR) |>
+  tigris::native_areas(year = year) |>
     sf::st_write(
       base::file.path(
         DATA_PATH, 

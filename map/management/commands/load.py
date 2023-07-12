@@ -16,9 +16,9 @@ class Command(BaseCommand):
                 'file': 'states.gpkg',
                 'layer': 0,
                 'field_map': {
-                    "fips": "GEOID",
-                    "name": "NAME",
-                    "abbrev": "STUSPS",
+                    "fips": "geoid",
+                    "name": "name",
+                    "abbrev": "stusps",
                     "geometry": "MULTIPOLYGON"
                 }
             },
@@ -27,9 +27,9 @@ class Command(BaseCommand):
                 'file': 'counties.gpkg',
                 'layer': 0,
                 'field_map': {
-                    "fips": "GEOID",
-                    "state_fips": {"fips": "STATEFP"},
-                    "name": "NAME",
+                    "fips": "geoid",
+                    "state_fips": {"fips": "statefp"},
+                    "name": "name",
                     "geometry": "MULTIPOLYGON"
                 }
             },
@@ -41,7 +41,7 @@ class Command(BaseCommand):
                     "fips": "geoid",
                     "state_fips": {"fips": "statefp"},
                     "county_fips": {"fips": "countyfp"},
-                    "geometry": "POLYGON"
+                    "geometry": "MULTIPOLYGON"
                 }
             }
         ],

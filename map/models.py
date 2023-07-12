@@ -59,7 +59,7 @@ class Tract(models.Model):
         on_delete = models.CASCADE
         )
     fips = models.CharField(
-        max_length = 6,
+        max_length = 11,
         help_text = "Eleven-digit tract FIPS.",
         blank = False,
         unique = True,
