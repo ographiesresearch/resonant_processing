@@ -1,57 +1,73 @@
 from django.db import models
 from django.contrib.gis.db import models
 
-class States(models.Model):
-    geoid = models.CharField(
+class State(models.Model):
+    fips = models.CharField(
         max_length = 2,
         help_text = "Two-digit state FIPS.",
-        primary_key = True
+        blank = False,
+        unique = True,
+        primary_key = False
         )
     # Longest state name is "Massachusetts," at 14.
-    state_name = models.CharField(
-        max_length = 14,
+    name = models.CharField(
+        max_length = 100,
         help_text = "Longhand state name.",
+        blank = True
+        )
+    abbrev = models.CharField(
+        max_length = 2,
+        help_text = "Two-letter state abbreviation.",
         blank = True
         )
     
     geometry = models.MultiPolygonField()
-    def geoid(self):
-        "Returns GEOID."
-        return self.state
+
+    def __str__(self):
+        return self.name
     
-class Counties(models.Model):
-    state_geoid = models.ForeignKey(
-        States,
+class County(models.Model):
+    state_fips = models.ForeignKey(
+        State,
         on_delete = models.CASCADE
         )
-    geoid = models.CharField(
+    fips = models.CharField(
         max_length = 5,
         help_text = "Five-digit county FIPS.",
-        primary_key = True
+        blank = False,
+        unique = True,
+        primary_key = False
         )
     # Longest county names are 14 characters + 7 for ' County'
-    county_name = models.CharField(
+    name = models.CharField(
         max_length = 21,
         help_text = "Longhand county name.",
         blank = True
         )
     geometry = models.MultiPolygonField()
     
-class Tracts(models.Model):
-    state_geoid = models.ForeignKey(
-        States,
+    def __str__(self):
+        return ", ".join([self.name + " County", self.state_fips.abbrev])
+    
+class Tract(models.Model):
+    state_fips = models.ForeignKey(
+        State,
         on_delete = models.CASCADE
         )
-    county_geoid = models.ForeignKey(
-        Counties,
+    county_fips = models.ForeignKey(
+        County,
         on_delete = models.CASCADE
         )
-    geoid = models.CharField(
+    fips = models.CharField(
         max_length = 6,
-        help_text = "Six-digit tract FIPS.",
-        primary_key = True
+        help_text = "Eleven-digit tract FIPS.",
+        blank = False,
+        unique = True,
+        primary_key = False
         )
     geometry = models.MultiPolygonField()
+    def __str__(self):
+        return ", ".join([self.fips, self.state_fips.abbrev])
     
 class Meta(models.Model):
     last_update = models.DateField(
@@ -81,7 +97,7 @@ class Meta(models.Model):
 class CoalClosures(Meta):
     # Coal closure energy communities' layer 
     tract_geoid = models.ForeignKey(
-        Tracts,
+        Tract,
         on_delete = models.CASCADE
         )
     mine = models.BooleanField(
@@ -112,7 +128,7 @@ class CoalClosures(Meta):
 class FFE(Meta):
     # fossil fuel employment (FFE) & unemployment requirements
     county_geoid = models.ForeignKey(
-        Counties,
+        County,
         on_delete = models.CASCADE
     )
     msa = models.BooleanField(
@@ -143,7 +159,7 @@ class FFE(Meta):
 class PPC(Meta):
     # Persistent poverty County
     county_geoid = models.ForeignKey(
-        Counties,
+        County,
         on_delete = models.CASCADE
     )
     msa = models.BooleanField(
