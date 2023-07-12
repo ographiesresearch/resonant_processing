@@ -69,12 +69,15 @@ ct_all_states_geom <- function(year = YEAR, states = STATES) {
     dplyr::rename_with(tolower)
   if (year == 2010) {
     df <- df |>
+      dplyr::select(-c(statefp, countyfp)) |>
       dplyr::rename(
-        geoid = geoid10
+        geoid = geoid10,
+        statefp = statefp10,
+        countyfp = countyfp10
       )
   }
   df |> 
-    dplyr::select(c(geoid))
+    dplyr::select(c(statefp, countyfp, geoid))
 }
 
 run <- function(year = YEAR, states = STATES, spatial_format = "gpkg") {
@@ -124,7 +127,10 @@ run <- function(year = YEAR, states = STATES, spatial_format = "gpkg") {
   rm(msa_ct)
   
   message("Downloading and writing counties...")
-  tigris::counties(year = YEAR) |>
+  purrr::map(states, function(s) {
+      tigris::counties(year = year, state = s)
+    }) |>
+    purrr::list_rbind() |>
     sf::st_write(
       base::file.path(
         DATA_PATH, 
@@ -136,6 +142,21 @@ run <- function(year = YEAR, states = STATES, spatial_format = "gpkg") {
         ), 
       delete_dsn = TRUE
       )
+  
+  message("Downloading and writing states...")
+  tigris::states(year = YEAR) |>
+    dplyr::filter(STUSPS %in% states) |>
+    sf::st_write(
+      base::file.path(
+        DATA_PATH, 
+        stringr::str_c(
+          "states", 
+          spatial_format,
+          sep="."
+        )
+      ), 
+      delete_dsn = TRUE
+    )
   
   message("Downloading and writing 2010 census tract geometries...")
   ct_all_states_geom(year = 2010, states) |>
