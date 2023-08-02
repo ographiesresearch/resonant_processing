@@ -9,8 +9,8 @@ class TractViewset(generics.ListAPIView):
 
     def get_queryset(self):
         try:
-            lng = float(self.kwargs['lng'])
-            lat = float(self.kwargs['lat'])
+            lng = float(self.request.query_params.get('lng'))
+            lat = float(self.request.query_params.get('lat'))
             pnt = Point(lng, lat)
         except:
             raise ValidationError(message='Failed to create point from lng/lat.')
