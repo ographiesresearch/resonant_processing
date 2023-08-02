@@ -1,4 +1,3 @@
-# from django.shortcuts import render
 from map.models import Tract
 from map.serializers import TractSerializer
 from rest_framework import generics
@@ -9,7 +8,6 @@ class TractViewset(generics.ListAPIView):
     serializer_class = TractSerializer
 
     def get_queryset(self):
-        lng = float(self.kwargs['lng'])
         try:
             lng = float(self.kwargs['lng'])
             lat = float(self.kwargs['lat'])
