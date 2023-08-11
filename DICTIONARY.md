@@ -100,7 +100,7 @@ In other words...
 $$
 energy\\_dis = 
 \begin{cases}
-  1 & (energy\\_costs >= 95^{th}\text{ \\%ile}\text{ | }pm25\\_exp >= 95^{th}\text{ \\%ile})\text{ \\& } low\\_income >= 65^{th}\text{ \\%ile}\\
+  1 & (energy\\_costs >= 90^{th}\text{ \\%ile}\text{ | }pm25\\_exp >= 90^{th}\text{ \\%ile})\text{ \\& } low\\_income >= 65^{th}\text{ \\%ile}\\
   0 & \text{otherwise}
 \end{cases}
 $$
