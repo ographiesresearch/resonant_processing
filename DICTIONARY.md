@@ -115,4 +115,15 @@ Persistent Poverty Counties, or PPCs, are one of the [county typologies](https:/
 
 ## Indian Land
 
-[TODO](https://github.com/ericrobskyhuntley/resonant_map/issues/3)
+"Indian Lands" are sourced from the U.S. Census's TIGER/Line "American Indian / Alaska Native / Native Hawaiian Areas" shapefile. For our purposes, we use MTFCC codes and, in limited cases, Tribal names to identify lands. Specifically, we use...
+
+| Type | MTFCCs |
+| --- | --- |
+| Federal/State American Indian Reservation (AIR) or Off-Reservation Trust Land (ORTL) | G2100 |
+| Federal AIR/ORTL Joint-Use Area | G2170 |
+| Hawaiian Home Land (HHL) | G2120 |
+| Oklahoma Tribal Statistical Area (OTSA) | G2140 |
+| OTSA Joint-Use Area | G2170 |
+| Alaska Native Village Statistical Area (ANVSA) | G2170 |
+
+Given recent jurisprudence in McGirt v. Oklahoma, the OTSAs of the Cherokee, Chickasaw, Choctaw, Muscogee (Creek), and Seminole Nations are treated as identical to American Indian Reservations.
