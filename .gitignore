@@ -239,3 +239,14 @@ renv/*
 data/*.csv
 data/*.kmz
 data/*.gpkg
+data/*.gpkg-hm
+data/*.gpkg-shm
+data/*.gpkg-wal
+data/*.qgz
+data/*.qmd
+data/_temp/*
+data/*.zip
+data/*.geojson
+data/*.shp
+data/*.prj
+data/*.shx
