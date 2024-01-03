@@ -3,6 +3,8 @@ DATA_PATH <- 'data'
 STATES <- base::unique(tidycensus::fips_codes$state)[1:51]
 CRS <- sf::st_crs(3857)
 
+tidycensus::census_api_key(Sys.getenv("CENSUS_KEY"))
+
 ct_data <- function(year = YEAR, states = STATES) {
   #' Downloads data for application at the census tract scale.
   #' 
@@ -90,12 +92,21 @@ cty_names <- function(year = YEAR) {
   #' 
   #' @param year Census year.
   
-  tigris::counties(cb=TRUE, year=year) |>
+  df <- tigris::counties(cb=TRUE, year=year) |>
     sf::st_drop_geometry() |>
     dplyr::rename_with(tolower) |>
     dplyr::rename(
       cty_name = name
-    ) |>
+    )
+  
+  if (year == 2010) {
+    df <- df |>
+      dplyr::mutate(
+        geoid = stringr::str_c(state, county)
+      )
+  }
+  
+  df |>
     dplyr::select(geoid, cty_name)
 }
 
