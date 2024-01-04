@@ -170,7 +170,10 @@ doe_download <- function(file) {
   )
   
   readr::read_csv(
-    temp,
+    base::unz(
+      description = temp,
+      filename = file
+    ),
     show_col_types = FALSE
   )
 }
@@ -305,8 +308,9 @@ run <- function(spatial_format = "gpkg") {
   
   message("Downloading 2011--2015 ACS data and calculating low-income status...")
   low_inc_15 <- ct_low_inc_status(ct_geom_10, year = 2015) |>
-    dplyr::rename(
-      low_inc_15 = low_inc
+    dplyr::rename_with(
+      ~ base::paste0(., "_15"), 
+      -geoid
     )
   
   native <- native_lands()
@@ -323,9 +327,9 @@ run <- function(spatial_format = "gpkg") {
     )
 
   ct_geom <- ct_geom |>
-    dplyr::left_join(low_inc) |>
-    dplyr::left_join(coal_download()) |>
-    dplyr::left_join(energy_download()) |>
+    dplyr::left_join(low_inc, by = "geoid") |>
+    dplyr::left_join(coal_download(), by = "geoid") |>
+    dplyr::left_join(energy_download(), by = "countyfp") |>
     dplyr::mutate(
       int_tribal = geoid %in% dplyr::pull(
         sf::st_filter(ct_geom, native),
