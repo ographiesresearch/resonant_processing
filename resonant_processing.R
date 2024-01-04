@@ -302,12 +302,12 @@ run <- function(spatial_format = "gpkg") {
   ct_geom <- ct_geometry(year = 2020)
   
   message("Downloading 2016--2020 ACS data and calculating low-income status...")
-  low_income <- ct_low_inc_status(ct_geom, year = 2020)
+  low_inc <- ct_low_inc_status(ct_geom, year = 2020)
   
   ct_geom_10 <- ct_geometry(year = 2010)
   
   message("Downloading 2011--2015 ACS data and calculating low-income status...")
-  low_income_15 <- ct_low_inc_status(ct_geom_10, year = 2015) |>
+  low_inc_15 <- ct_low_inc_status(ct_geom_10, year = 2015) |>
     dplyr::rename(
       low_inc_15 = low_inc
     )
@@ -326,7 +326,7 @@ run <- function(spatial_format = "gpkg") {
     )
 
   ct_geom <- ct_geom |>
-    dplyr::left_join(low_income) |>
+    dplyr::left_join(low_inc) |>
     dplyr::left_join(coal_download()) |>
     dplyr::left_join(energy_download()) |>
     dplyr::mutate(
@@ -369,8 +369,8 @@ run <- function(spatial_format = "gpkg") {
         TRUE ~ as.logical(pp)
       )
     ) |>
-    dplyr::left_join(low_income_15) |>
-    dplyr::filter(pp | nrg_disadv | low_inc) |>
+    dplyr::left_join(low_inc_15) |>
+    dplyr::filter(pp | nrg_disadv | low_inc_15) |>
     sf::st_write(
       base::file.path(
         DATA_PATH,
