@@ -2,7 +2,8 @@ YEAR <- 2020
 DATA_PATH <- 'data'
 RSLT_GPKG <- 'results.gpkg'
 STATES <- base::unique(tidycensus::fips_codes$state)[1:51]
-CRS <- sf::st_crs(3857)
+# STATES <- c('AZ', 'NM')
+CRS <- sf::st_crs(5070)
 
 tidycensus::census_api_key(Sys.getenv("CENSUS_KEY"))
 
@@ -141,7 +142,7 @@ ct_geometry <- function(year = YEAR, states = STATES, crs = CRS) {
     sf::st_cast('MULTIPOLYGON') |>
     sf::st_transform(crs) |>
     dplyr::mutate(
-      year = YEAR
+      year = year
     ) |>
     dplyr::left_join(
       cty_names(year), by = c("countyfp" = "geoid")
@@ -179,6 +180,10 @@ doe_download <- function(file) {
 }
 
 coal_download <- function() {
+  #' Downloads coal closure communities.
+  #' 
+  #' @export
+  
   message("Fetching coal closure communities...")
   doe_download("coal") |> 
     dplyr::select(
@@ -190,6 +195,10 @@ coal_download <- function() {
 }
 
 energy_download <- function() {
+  #' Downloads energy communities.
+  #' 
+  #' @export
+  
   message("Fetching energy communities...")
   doe_download("energy") |> 
     dplyr::select(
@@ -200,6 +209,10 @@ energy_download <- function() {
 }
 
 cejst_download <- function() {
+  #' Downloads environmental burden data from CEJST.
+  #' 
+  #' @export
+  
   message("Fetching environmental burden data from the CEJST...")
   ct_cejst <- readr::read_csv(
       "https://static-data-screeningtool.geoplatform.gov/data-versions/1.0/data/score/downloadable/1.0-communities.csv",
@@ -223,6 +236,10 @@ cejst_download <- function() {
 }
 
 pp_download <- function() {
+  #' Downloads persistant poverty data from USDA.
+  #' 
+  #' @export
+  
   message("Fetching persistent poverty counties...")
   readr::read_csv(
     "https://www.ers.usda.gov/webdocs/DataFiles/48652/2015CountyTypologyCodes.csv",
@@ -239,6 +256,10 @@ pp_download <- function() {
 }
 
 native_lands <- function() {
+  #' Downloads native lands.
+  #' 
+  #' @export
+  
   message("Downloading native lands...")
   tigris::native_areas(YEAR) |>
     dplyr::rename(
@@ -258,6 +279,13 @@ native_lands <- function() {
 }
 
 ct_low_inc_status <- function(ct_sf, year = YEAR, states = STATES) {
+  #' Calculates low-income community status as given by the New Markets
+  #' Tax Credit.
+  #' 
+  #' @param ct_sf Simple features dataframe containing census attributes.
+  #' @param year Numeric final year of 5-year ACS window.
+  #' @param states List of states for which to download income data.
+  
   ct_data(year, states) |>
     dplyr::left_join(
       mfi_state(year), 
@@ -298,7 +326,54 @@ ct_low_inc_status <- function(ct_sf, year = YEAR, states = STATES) {
     )
 }
 
+st_sym_intersection <- function(x, y, splinter_filter = TRUE, splinter_thresh = 1000) {
+  #' Calculates the equivalent of a symmetrical difference, but including the
+  #' geometric intersection. (Useful enough that I don't know why `sf` doesn't
+  #' include something similar.)
+  #' 
+  #' @param x Simple features dataframe (only tested on polygons).
+  #' @param y Simple features dataframe (only tested on polygons).
+  #' @param splinter_filter Whether to filter out splinters on the basis of area.
+  #' @param splinter_thresh Threshold value (in meters) used to filter out splinters.
+  
+  int <- x |>
+    sf::st_intersection(y)
+  
+  x_diff <- x |>
+    sf::st_difference(sf::st_union(y))
+  
+  y_diff <- y |>
+    sf::st_difference(sf::st_union(x))
+  
+  result <- int |>
+    dplyr::bind_rows(x_diff) |>
+    dplyr::bind_rows(y_diff) |>
+    sf::st_collection_extract("POLYGON")
+  
+  if(splinter_filter) {
+    result <- result |>
+      dplyr::mutate(
+        area = sf::st_area(geometry)
+      ) |>
+      dplyr::filter(
+        area > units::as_units(splinter_thresh, "m^2")
+      ) |>
+      dplyr::group_by(across(c(-area, -geometry)))
+  } else {
+    result <- result |>
+      dplyr::group_by(across(c(-geometry)))
+    
+  }
+  result |>
+    dplyr::summarize(
+      geometry = sf::st_union(geometry)
+    ) |>
+    dplyr::ungroup()
+}
+
 run <- function(spatial_format = "gpkg") {
+  #' Run entire process.
+  
   ct_geom <- ct_geometry(year = 2020)
   
   message("Downloading 2016--2020 ACS data and calculating low-income status...")
@@ -313,9 +388,7 @@ run <- function(spatial_format = "gpkg") {
       -geoid
     )
   
-  native <- native_lands()
-
-  native |>
+  native <- native_lands() |>
     sf::st_write(
       base::file.path(
         DATA_PATH,
@@ -381,10 +454,119 @@ run <- function(spatial_format = "gpkg") {
       delete_layer = TRUE,
       append = FALSE
     )
+  
+  message("Intersecting 2010 and 2020 geometries---this may take a while.")
+  ct_int <- ct_geom |>
+    st_sym_intersection(ct_geom_10) |>
+    dplyr::mutate(
+      deprec = dplyr::case_when(
+        !low_inc & low_inc_15 ~ TRUE,
+        low_inc ~ FALSE,
+        .default = NA
+      ),
+      low_inc = dplyr::case_when(
+        !low_inc & low_inc_15 ~ low_inc_15,
+        low_inc ~ low_inc,
+        .default = NA
+      ),
+      inc_rat_lo = dplyr::case_when(
+        !low_inc & low_inc_15 ~ inc_rat_lo_15,
+        .default = inc_rat_lo
+      ),
+      inc_rat = dplyr::case_when(
+        !low_inc & low_inc_15 ~ inc_rat_15,
+        .default = inc_rat
+      ),
+      name_msa = dplyr::case_when(
+        !low_inc & low_inc_15 ~ name_msa_15,
+        .default = name_msa
+      ),
+      name_state = dplyr::case_when(
+        !low_inc & low_inc_15 ~ name_state_15,
+        .default = name_state
+      ),
+      regiontype = dplyr::case_when(
+        !low_inc & low_inc_15 ~ regiontype_15,
+        .default = regiontype
+      ),
+      mfi_region = dplyr::case_when(
+        !low_inc & low_inc_15 ~ mfi_region_15,
+        .default = mfi_region
+      ),
+      pov_rat_hi = dplyr::case_when(
+        !low_inc & low_inc_15 ~ pov_rat_hi_15,
+        .default = pov_rat_hi
+      ),
+      pov_rat = dplyr::case_when(
+        !low_inc & low_inc_15 ~ pov_rat_15,
+        .default = pov_rat
+      ),
+      mfi = dplyr::case_when(
+        !low_inc & low_inc_15 ~ mfi_15,
+        .default = mfi
+      ),
+      geoid = dplyr::case_when(
+        !low_inc & low_inc_15 ~ geoid.1,
+        .default = geoid
+      )
+    ) |>
+    dplyr::select(-dplyr::contains(".1"), -dplyr::contains("_15"))
+  
+  native_int <- native |>
+    sf::st_filter(ct_int) |>
+    dplyr::mutate(
+      native = TRUE
+    ) |>
+    dplyr::select(native)
+  
+  message("Intersecting Native Lands & Tracts---this may take a while.")
+  cumulative <- st_sym_intersection(
+      ct_int,
+      native_int
+    ) |> 
+    dplyr::mutate(
+      dplyr::across(
+        dplyr::where(is.logical),
+        ~ dplyr::case_when(
+          is.na(.) ~ FALSE,
+          .default = .
+        )
+      )
+    ) |>
+    sf::st_write(
+      base::file.path(
+        DATA_PATH,
+        RSLT_GPKG
+      ),
+      'cumulative',
+      delete_layer = TRUE,
+      append = FALSE
+    ) |>
+    dplyr::mutate(
+      credits = dplyr::case_when(
+        (low_inc | native) & (nrg_comm) ~ 2,
+        (low_inc | native) | (nrg_comm) ~ 1,
+        .default = 0
+      )
+    ) |>
+    dplyr::filter(
+      credits > 0
+    ) |>
+    sf::st_write(
+      base::file.path(
+        DATA_PATH,
+        RSLT_GPKG
+      ),
+      'cumulative_filter',
+      delete_layer = TRUE,
+      append = FALSE
+    )
 
-  message("Unioning add'l selection criteria and exporting to GeoJSON for Mapbox upload...")
-  ct_geom_10 |>
+  message("Unioning additional selection criteria for Mapbox cartography...")
+  cumulative |>
     dplyr::filter(pp | nrg_disadv) |>
+    # 'Pillowing' geometries to eliminate tiny gaps.
+    sf::st_buffer(units::as_units(10, "m")) |>
     sf::st_union() |>
     sf::st_cast("POLYGON", do_split = TRUE) |>
     sf::st_as_sf() |>
@@ -392,9 +574,11 @@ run <- function(spatial_format = "gpkg") {
     sf::st_write(
       base::file.path(
         DATA_PATH,
-        'addl_selection.geojson'
+        RSLT_GPKG
       ),
-      delete_dsn = TRUE
+      'additional_criteria',
+      delete_layer = TRUE,
+      append = FALSE
     )
 
   message("Done!")
