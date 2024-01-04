@@ -170,10 +170,7 @@ doe_download <- function(file) {
   )
   
   readr::read_csv(
-    utils::unzip(
-      temp,
-      file
-    ),
+    temp,
     show_col_types = FALSE
   )
 }
