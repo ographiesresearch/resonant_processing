@@ -1,5 +1,6 @@
 YEAR <- 2020
 DATA_PATH <- 'data'
+RSLT_GPKG <- 'results.gpkg'
 STATES <- base::unique(tidycensus::fips_codes$state)[1:51]
 CRS <- sf::st_crs(3857)
 
@@ -256,34 +257,21 @@ native_lands <- function() {
     dplyr::select(geoid, name_long)
 }
 
-run <- function(spatial_format = "gpkg") {
-  message("Starting Data Download and Processing Procedure...")
-  
-  ct_geom <- ct_geometry(YEAR, STATES)
-  
-  msa_geom <- mfi_msas(YEAR)
-  
-  message("Determining which census tracts lie within Metropolitan Statistical Areas...")
-  msa_ct <- msa_geom |>
-    sf::st_join(
-      ct_geom,
-      # Note to self: st_contains is way faster than st_intersects.
-      # Somehow it's not just a logical inverse?
-      # See here: https://github.com/r-spatial/sf/issues/1261
-      join = sf::st_contains,
-      left = FALSE
-    ) |>
-    sf::st_drop_geometry()
-  
-  rm(msa_geom)
-  
-  message("Downloading census data and calculating low-income status...")
-  low_income <- ct_data(YEAR, STATES) |>
+ct_low_inc_status <- function(ct_sf, year = YEAR, states = STATES) {
+  ct_data(year, states) |>
     dplyr::left_join(
-      mfi_state(YEAR), by = c("geoid_state" = "geoid")
+      mfi_state(year), 
+      by = c("geoid_state" = "geoid")
     ) |>
     dplyr::left_join(
-      msa_ct, by = c("geoid" = "geoid")
+      mfi_msas(year) |>
+        sf::st_join(
+          sf::st_point_on_surface(ct_sf),
+          join = sf::st_contains,
+          left = FALSE
+        ) |>
+        sf::st_drop_geometry(), 
+      by = c("geoid" = "geoid")
     ) |>
     dplyr::mutate(
       mfi_region = base::pmax(mfi_state, mfi_msa, na.rm = TRUE),
@@ -307,35 +295,46 @@ run <- function(spatial_format = "gpkg") {
       inc_rat,
       inc_rat_lo, 
       low_inc
-      )
+    )
+}
+
+run <- function(spatial_format = "gpkg") {
+  ct_geom <- ct_geometry(year = 2020)
   
-  rm(msa_ct)
+  message("Downloading 2016--2020 ACS data and calculating low-income status...")
+  low_inc <- ct_low_inc_status(ct_geom, year = 2020)
+  
+  ct_geom_10 <- ct_geometry(year = 2010)
+  
+  message("Downloading 2011--2015 ACS data and calculating low-income status...")
+  low_inc_15 <- ct_low_inc_status(ct_geom_10, year = 2015) |>
+    dplyr::rename(
+      low_inc_15 = low_inc
+    )
   
   native <- native_lands()
-  
+
   native |>
     sf::st_write(
       base::file.path(
-        DATA_PATH, 
-        stringr::str_c(
-          "native", 
-          "gpkg",
-          sep="."
-        )
-      ), 
-      delete_dsn = TRUE
+        DATA_PATH,
+        RSLT_GPKG
+      ),
+      'native',
+      delete_layer = TRUE,
+      append = FALSE
     )
-  
-  ct_geom <- ct_geom |> 
-    dplyr::left_join(low_income) |>
+
+  ct_geom <- ct_geom |>
+    dplyr::left_join(low_inc) |>
     dplyr::left_join(coal_download()) |>
     dplyr::left_join(energy_download()) |>
     dplyr::mutate(
       int_tribal = geoid %in% dplyr::pull(
-        sf::st_filter(ct_geom, native), 
+        sf::st_filter(ct_geom, native),
         geoid
         )
-    ) |> 
+    ) |>
     dplyr::mutate(
       dplyr::across(c(ffe, ec, mine, gen, adj), ~ dplyr::case_when(
         . == "Yes" ~ TRUE,
@@ -349,26 +348,20 @@ run <- function(spatial_format = "gpkg") {
     ) |>
     dplyr::ungroup() |>
     dplyr::filter(nrg_comm | low_inc | int_tribal) |>
-    dplyr::select(-int_tribal)
-  
-  rm(low_income)
-  
-  ct_geom |>
+    dplyr::select(-int_tribal) |>
     sf::st_write(
       base::file.path(
-        DATA_PATH, 
-        stringr::str_c(
-          "ct_geom", 
-          "gpkg",
-          sep="."
-        )
-      ), 
-      delete_dsn = TRUE
+        DATA_PATH,
+        RSLT_GPKG
+      ),
+      'ct_geom',
+      delete_layer = TRUE,
+      append = FALSE
     )
-  
+
   message("Downloading 2010 census tract geometries...")
-  ct_geom_2010 <- ct_geometry(year = 2010, STATES) |>
-    dplyr::left_join(pp_download()) |> 
+  ct_geom_10 <- ct_geom_10 |>
+    dplyr::left_join(pp_download()) |>
     dplyr::left_join(cejst_download()) |>
     dplyr::mutate(
       pp = dplyr::case_when(
@@ -376,19 +369,16 @@ run <- function(spatial_format = "gpkg") {
         TRUE ~ as.logical(pp)
       )
     ) |>
-    dplyr::filter(pp | nrg_disadv)
-  
-  ct_geom_2010 |>
+    dplyr::left_join(low_inc_15) |>
+    dplyr::filter(pp | nrg_disadv | low_inc_15) |>
     sf::st_write(
       base::file.path(
-        DATA_PATH, 
-        stringr::str_c(
-          "ct_geom_2010", 
-          "gpkg",
-          sep="."
-        )
-      ), 
-      delete_dsn = TRUE
+        DATA_PATH,
+        RSLT_GPKG
+      ),
+      'ct_geom_2010',
+      delete_layer = TRUE,
+      append = FALSE
     )
 
   message("Unioning add'l selection criteria and exporting to GeoJSON for Mapbox upload...")
@@ -400,16 +390,12 @@ run <- function(spatial_format = "gpkg") {
     sf::st_transform(3857) |>
     sf::st_write(
       base::file.path(
-        DATA_PATH, 
-        stringr::str_c(
-          "priority_boundaries", 
-          "shp",
-          sep="."
-        )
-      ), 
+        DATA_PATH,
+        'addl_selection.geojson'
+      ),
       delete_dsn = TRUE
     )
-  
+
   message("Done!")
   return(invisible(NULL))
 }
