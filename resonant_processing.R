@@ -390,9 +390,11 @@ run <- function(spatial_format = "gpkg") {
       ), 
       delete_dsn = TRUE
     )
-  
-  message("Unioning adder boundaries and exporting to GeoJSON for Mapbox upload...")
-  sf::st_union(ct_geom_2010) |>
+
+  message("Unioning add'l selection criteria and exporting to GeoJSON for Mapbox upload...")
+  ct_geom_10 |>
+    dplyr::filter(pp | nrg_disadv) |>
+    sf::st_union() |>
     sf::st_cast("POLYGON", do_split = TRUE) |>
     sf::st_as_sf() |>
     sf::st_transform(3857) |>
