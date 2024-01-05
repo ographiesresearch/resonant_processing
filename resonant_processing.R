@@ -464,10 +464,6 @@ run <- function(spatial_format = "gpkg") {
         !low_inc & low_inc_15 ~ TRUE,
         .default = FALSE
       ),
-      low_inc = dplyr::case_when(
-        !low_inc & low_inc_15 ~ low_inc_15,
-        .default = low_inc
-      ),
       inc_rat_lo = dplyr::case_when(
         !low_inc & low_inc_15 ~ inc_rat_lo_15,
         .default = inc_rat_lo
@@ -507,16 +503,26 @@ run <- function(spatial_format = "gpkg") {
       geoid = dplyr::case_when(
         !low_inc & low_inc_15 ~ geoid.1,
         .default = geoid
+      ),
+      low_inc = dplyr::case_when(
+        !low_inc & low_inc_15 ~ low_inc_15,
+        .default = low_inc
       )
     ) |>
-    dplyr::select(-dplyr::contains(".1"), -dplyr::contains("_15"))
+    dplyr::select(
+      -dplyr::contains(".1"), 
+      -dplyr::contains("_15")
+      )
   
   native_int <- native |>
     sf::st_filter(ct_int) |>
     dplyr::mutate(
       native = TRUE
     ) |>
-    dplyr::select(native)
+    dplyr::select(
+      native,
+      native_name = name_long
+    )
   
   message("Intersecting Native Lands & Tracts---this may take a while.")
   cumulative <- st_sym_intersection(
@@ -532,15 +538,6 @@ run <- function(spatial_format = "gpkg") {
         )
       )
     ) |>
-    sf::st_write(
-      base::file.path(
-        DATA_PATH,
-        RSLT_GPKG
-      ),
-      'cumulative',
-      delete_layer = TRUE,
-      append = FALSE
-    ) |>
     dplyr::mutate(
       credits = dplyr::case_when(
         (low_inc | native) & (nrg_comm) ~ 2,
@@ -550,6 +547,35 @@ run <- function(spatial_format = "gpkg") {
     ) |>
     dplyr::filter(
       credits > 0
+    ) |>
+    dplyr::select(
+      c(
+        geoid,
+        cty_name,
+        mfi,
+        pov_rat,
+        pov_rat_hi,
+        mfi_region,
+        regiontype,
+        name_msa,
+        inc_rat,
+        inc_rat_lo,
+        low_inc,
+        mine,
+        gen,
+        adj,
+        ec,
+        ffe,
+        nrg_comm,
+        pp,
+        nrg_burd_p,
+        pm25_p,
+        pov_p,
+        nrg_disadv,
+        deprec,
+        native,
+        native_name
+      )
     ) |>
     sf::st_write(
       base::file.path(
@@ -572,6 +598,7 @@ run <- function(spatial_format = "gpkg") {
   message("Unioning additional selection criteria for Mapbox cartography...")
   cumulative |>
     dplyr::filter(pp | nrg_disadv) |>
+    sf::st_make_valid() |>
     # 'Pillowing' geometries to eliminate tiny gaps.
     sf::st_buffer(units::as_units(10, "m")) |>
     sf::st_union() |>
