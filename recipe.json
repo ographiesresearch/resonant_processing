@@ -4,7 +4,17 @@
       "geographies": {
         "source": "mapbox://tileset-source/ericrobskyhuntley/resonant-energy-geographies",
         "minzoom": 4,
-        "maxzoom": 10
+        "maxzoom": 10,
+        "features": {
+          "simplification": [ "case",
+          [ "<", [ "zoom" ], 6 ], 12,
+          [ "<", [ "zoom" ], 8 ], 8,
+          4
+          ]
+        },
+        "tiles": {
+          "layer_size": 2500
+        }
       }, 
       "additional": {
         "source": "mapbox://tileset-source/ericrobskyhuntley/resonant-energy-additional",
