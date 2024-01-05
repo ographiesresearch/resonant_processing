@@ -556,9 +556,17 @@ run <- function(spatial_format = "gpkg") {
         DATA_PATH,
         RSLT_GPKG
       ),
-      'cumulative_filter',
+      'resonant_results',
       delete_layer = TRUE,
       append = FALSE
+    ) |>
+    sf::st_transform(4326) |>
+    sf::st_write(
+      base::file.path(
+        DATA_PATH,
+        'resonant_results.geojson'
+      ),
+      delete_dsn = TRUE
     )
 
   message("Unioning additional selection criteria for Mapbox cartography...")
@@ -569,7 +577,6 @@ run <- function(spatial_format = "gpkg") {
     sf::st_union() |>
     sf::st_cast("POLYGON", do_split = TRUE) |>
     sf::st_as_sf() |>
-    sf::st_transform(3857) |>
     sf::st_write(
       base::file.path(
         DATA_PATH,
@@ -578,6 +585,14 @@ run <- function(spatial_format = "gpkg") {
       'additional_criteria',
       delete_layer = TRUE,
       append = FALSE
+    ) |>
+    sf::st_transform(4326) |>
+    sf::st_write(
+      base::file.path(
+        DATA_PATH,
+        'additional_criteria.geojson'
+      ),
+      delete_dsn = TRUE
     )
 
   message("Done!")
