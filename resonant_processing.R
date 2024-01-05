@@ -2,7 +2,6 @@ YEAR <- 2020
 DATA_PATH <- 'data'
 RSLT_GPKG <- 'results.gpkg'
 STATES <- base::unique(tidycensus::fips_codes$state)[1:51]
-# STATES <- c('AZ', 'NM')
 CRS <- sf::st_crs(5070)
 
 tidycensus::census_api_key(Sys.getenv("CENSUS_KEY"))
@@ -455,19 +454,19 @@ run <- function(spatial_format = "gpkg") {
       append = FALSE
     )
   
+  rm(low_inc, low_inc_15)
+  
   message("Intersecting 2010 and 2020 geometries---this may take a while.")
   ct_int <- ct_geom |>
     st_sym_intersection(ct_geom_10) |>
     dplyr::mutate(
       deprec = dplyr::case_when(
         !low_inc & low_inc_15 ~ TRUE,
-        low_inc ~ FALSE,
-        .default = NA
+        .default = FALSE
       ),
       low_inc = dplyr::case_when(
         !low_inc & low_inc_15 ~ low_inc_15,
-        low_inc ~ low_inc,
-        .default = NA
+        .default = low_inc
       ),
       inc_rat_lo = dplyr::case_when(
         !low_inc & low_inc_15 ~ inc_rat_lo_15,
