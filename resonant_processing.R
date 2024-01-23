@@ -458,7 +458,25 @@ run <- function(spatial_format = "gpkg") {
   
   message("Intersecting 2010 and 2020 geometries---this may take a while.")
   ct_int <- ct_geom |>
-    st_sym_intersection(ct_geom_10) |>
+    st_sym_intersection(ct_geom_10) |> 
+    dplyr::mutate(
+      dplyr::across(
+        dplyr::where(is.logical),
+        ~ dplyr::case_when(
+          is.na(.) ~ FALSE,
+          .default = .
+        )
+      )
+    ) |>
+    sf::st_write(
+      base::file.path(
+        DATA_PATH,
+        RSLT_GPKG
+      ),
+      'preprocessing',
+      delete_layer = TRUE,
+      append = FALSE
+    ) |>
     dplyr::mutate(
       deprec = dplyr::case_when(
         !low_inc & low_inc_15 ~ TRUE,
@@ -500,10 +518,10 @@ run <- function(spatial_format = "gpkg") {
         !low_inc & low_inc_15 ~ mfi_15,
         .default = mfi
       ),
-      geoid = dplyr::case_when(
-        !low_inc & low_inc_15 ~ geoid.1,
-        .default = geoid
-      ),
+      # geoid = dplyr::case_when(
+      #   !low_inc & low_inc_15 ~ geoid.1,
+      #   .default = geoid
+      # ),
       low_inc = dplyr::case_when(
         !low_inc & low_inc_15 ~ low_inc_15,
         .default = low_inc
@@ -538,15 +556,8 @@ run <- function(spatial_format = "gpkg") {
         )
       )
     ) |>
-    dplyr::mutate(
-      credits = dplyr::case_when(
-        (low_inc | native) & (nrg_comm) ~ 2,
-        (low_inc | native) | (nrg_comm) ~ 1,
-        .default = 0
-      )
-    ) |>
     dplyr::filter(
-      credits > 0
+      (low_inc | native | nrg_comm)
     ) |>
     dplyr::select(
       c(
