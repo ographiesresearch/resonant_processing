@@ -2,7 +2,7 @@
   "version": 1,
     "layers": {
       "geographies": {
-        "source": "mapbox://tileset-source/ericrobskyhuntley/resonant-energy-geographies",
+        "source": "mapbox://tileset-source/ericrobskyhuntley/resonant-geographies",
         "minzoom": 4,
         "maxzoom": 10,
         "features": {
@@ -17,7 +17,7 @@
         }
       }, 
       "additional": {
-        "source": "mapbox://tileset-source/ericrobskyhuntley/resonant-energy-additional",
+        "source": "mapbox://tileset-source/ericrobskyhuntley/resonant-additional",
         "minzoom": 4,
         "maxzoom": 10
       }
