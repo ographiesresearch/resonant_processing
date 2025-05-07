@@ -1,5 +1,9 @@
 # Data Acquisition and Processing for `resonantenergy.app`
 
+
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Project Status: Inactive – The project has reached a stable, usable state but is no longer being actively developed; support/maintenance will be provided as time allows.](https://www.repostatus.org/badges/latest/inactive.svg)](https://www.repostatus.org/#inactive)
+
 This repository is the home of an R script that download and process data for a mapping application for Resonant Energy that makes geographic criteria for the low-income communities bonus energy investment credit and the energy communities programs queryable by a user. Running the script is time-consuming and memory-intensive. (It took approximately 2 hours on a 2021 Apple M1 with 64 GB of memory.) Speeding this up would be great (many of the geometric set operations are substantially faster in QGIS), but not a priority at the moment.
 
 Once you run the R script, you can push the results to Mapbox as a tilset using the [Mapbox Tilsets Command Line Interface (CLI)](https://docs.mapbox.com/help/tutorials/get-started-mts-and-tilesets-cli/). This should allow you to circumvent the 300 megabyte upload limit enforced by the web interface. First, upload the data. Assuming that you've run the script and that you have a Mapbox secret token that includes the `tilesets:write`, `tilesets:read`, and `tilesets:list` scopes, you can upload the two necessary layers as Mapbox tileset sources using the following commands:
