@@ -1,8 +1,6 @@
 # Data Acquisition and Processing for `resonantenergy.app`
 
-
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Project Status: Inactive – The project has reached a stable, usable state but is no longer being actively developed; support/maintenance will be provided as time allows.](https://www.repostatus.org/badges/latest/inactive.svg)](https://www.repostatus.org/#inactive)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Project Status: Inactive – The project has reached a stable, usable state but is no longer being actively developed; support/maintenance will be provided as time allows.](https://www.repostatus.org/badges/latest/inactive.svg)](https://www.repostatus.org/#inactive) [![DOI](https://zenodo.org/badge/686392410.svg)](https://doi.org/10.5281/zenodo.15366783)
 
 This repository is the home of an R script that download and process data for a mapping application for Resonant Energy that makes geographic criteria for the low-income communities bonus energy investment credit and the energy communities programs queryable by a user. Running the script is time-consuming and memory-intensive. (It took approximately 2 hours on a 2021 Apple M1 with 64 GB of memory.) Speeding this up would be great (many of the geometric set operations are substantially faster in QGIS), but not a priority at the moment.
 
